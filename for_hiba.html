@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For Hiba — Now & Always</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0e0f25;
+      --bg2:#141534;
+      --glass: rgba(255,255,255,.08);
+      --glass-border: rgba(255,255,255,.22);
+      --accent:#ff6b9a;
+      --accent-2:#ffd1dc;
+      --ink:#e9ecff;
+      --muted:#c8ccffcc;
+      --glow:#ff6b9a55;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink);
+      background: radial-gradient(1200px 800px at 70% -10%, #1b1f56 0%, transparent 60%),
+                  radial-gradient(900px 600px at -10% 100%, #2a1757 0%, transparent 60%),
+                  linear-gradient(160deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* Subtle stars field */
+    .stars, .stars2, .stars3{
+      position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-repeat:repeat;
+      background-image: radial-gradient(1px 1px at 10px 20px,#fff8 50%,transparent 52%),
+                        radial-gradient(1px 1px at 30px 40px,#fff5 50%,transparent 52%),
+                        radial-gradient(1px 1px at 50px 15px,#fff6 50%,transparent 52%),
+                        radial-gradient(1px 1px at 80px 70px,#fff5 50%,transparent 52%);
+      animation: drift 120s linear infinite;
+      opacity:.25;
+    }
+    .stars2{ animation-duration: 180s; opacity:.18; filter: blur(.6px); }
+    .stars3{ animation-duration: 240s; opacity:.12; filter: blur(1.2px); }
+
+    @keyframes drift{
+      from{ background-position: 0 0, 0 0, 0 0, 0 0; }
+      to  { background-position: 2000px 1000px, -1500px 800px, 1200px -900px, -1000px -1200px; }
+    }
+
+    /* Floating hearts */
+    .hearts{
+      position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;
+    }
+    .heart{
+      position:absolute; width:18px; height:18px; opacity:.08;
+      animation: floatUp linear infinite;
+      transform: translateY(110vh) scale(1);
+      filter: drop-shadow(0 0 6px var(--glow));
+    }
+    .heart svg{width:100%;height:100%}
+    @keyframes floatUp{
+      from{ transform: translateY(110vh) translateX(var(--x)) scale(1); }
+      to  { transform: translateY(-20vh)  translateX(calc(var(--x) + var(--drift))) scale(1.2); }
+    }
+
+    /* Layout */
+    .wrap{
+      position:relative; z-index:2; min-height:100%; display:grid;
+      place-items:center; padding:64px 20px;
+    }
+    .card{
+      width:min(920px, 94vw);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--glass-border);
+      border-radius:28px;
+      box-shadow: 0 20px 60px #0008, inset 0 0 0 1px #fff1;
+      backdrop-filter: blur(12px);
+      padding: clamp(22px, 4.5vw, 44px);
+    }
+
+    .title{
+      font-family:"Great Vibes", serif;
+      font-size: clamp(40px, 7.2vw, 88px);
+      line-height: .95;
+      color:#fff;
+      text-align:center;
+      margin:0 0 8px;
+      text-shadow: 0 6px 30px #0009;
+    }
+    .subtitle{
+      text-align:center;
+      margin:0 0 26px;
+      color:var(--muted);
+      font-weight:300;
+      letter-spacing:.2px;
+    }
+
+    .ribbon{
+      display:flex; align-items:center; gap:10px; justify-content:center;
+      margin:16px auto 28px;
+      width:fit-content; padding:10px 16px; border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      border:1px solid var(--glass-border);
+      font-size:.95rem; color:#ffeaf1;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--glow)}
+
+    .letter{
+      font-size: clamp(16px, 1.9vw, 19px);
+      line-height: 1.85;
+      color:#f6f7ff;
+      white-space: pre-line;
+      opacity:0;
+      transform: translateY(6px);
+      animation: fadeSlide .8s ease forwards .6s;
+    }
+    @keyframes fadeSlide{
+      to{ opacity:1; transform:none; }
+    }
+
+    .promise{
+      display:grid; grid-template-columns: 1fr; gap:14px; margin:24px 0 8px;
+    }
+    .promise .chip{
+      border:1px solid var(--glass-border); border-radius:999px;
+      padding:10px 14px; width:fit-content; background:var(--glass);
+      backdrop-filter: blur(6px); font-size:.9rem; color:#ffe3ea;
+    }
+
+    .signature{
+      margin-top: 26px;
+      font-style: italic;
+      color: var(--accent-2);
+      text-align:right;
+      letter-spacing:.2px;
+    }
+
+    /* CTA row */
+    .cta{
+      display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:26px;
+    }
+    .btn{
+      --b:2px;
+      padding:12px 18px; border-radius:14px; font-weight:600;
+      border:var(--b) solid transparent; cursor:pointer;
+      color:#15162b; background:linear-gradient(180deg,#ffe1ea,#ffc7d9);
+      box-shadow: 0 10px 24px #0006, inset 0 -8px 16px #ffffff88;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px #0007 }
+    .btn.ghost{
+      color:#ffeaf1; background:transparent; border-color:#ffffff44;
+      box-shadow:none;
+    }
+    .btn.ghost:hover{ filter: brightness(1.12) }
+
+    /* Typewriter intro line */
+    .type{
+      width:fit-content; margin:0 auto 14px; color:#ffd9e6; opacity:.9;
+      font-family: "Great Vibes", serif; font-size:clamp(22px,3.5vw,34px);
+      overflow:hidden; border-right:2px solid #ffd9e6; white-space:nowrap;
+      animation: typing 3.8s steps(30,end), blink .9s step-end infinite alternate;
+    }
+    @keyframes typing { from{ width:0 } to { width: 20ch } }
+    @keyframes blink { 50%{ border-color: transparent } }
+
+    /* Small screens */
+    @media (max-width:520px){
+      .letter{ line-height:1.75 }
+      .ribbon{ font-size:.88rem }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background layers -->
+  <div class="stars"></div>
+  <div class="stars2"></div>
+  <div class="stars3"></div>
+  <div class="hearts" id="hearts"></div>
+
+  <main class="wrap" role="main">
+    <article class="card" aria-label="Romantic letter">
+      <div class="type">A note sent at 21:52…</div>
+
+      <h1 class="title">Hiba, my love</h1>
+      <p class="subtitle">Now & Always</p>
+
+      <div class="ribbon" aria-label="Anniversary timestamp">
+        <span class="dot" aria-hidden="true"></span>
+        <strong>September 17, 2024 · 21:52</strong>
+        <span>— when our everyday talks truly began</span>
+      </div>
+
+      <section class="letter" id="letter">
+Hiba, my love,
+
+At 21:52 on September 17, 2024, something beautiful began. It wasn’t our first chat, but it was the night our daily talks started and never stopped. I’m sending this at the exact minute to tell you how grateful I am for every message, every laugh, every quiet moment we have shared since then.
+
+I dream of the day we live together, under the blessing of our Lord, in a warm and peaceful home. We will keep talking every day, the way we always do—about small things and big dreams. We will cook side by side, share sunsets, pray together, and carry each other through hard days. We will keep learning, keep laughing, and keep experiencing life as one team.
+
+I promise to listen to you with care, to speak to you with kindness, and to protect our love with honesty. Your voice is my calm. Your smile is my courage. Your heart is my favorite place.
+
+Thank you for choosing me again and again since that night. I choose you too—today, tomorrow, and all the days to come.
+
+I love you, now and always.
+      </section>
+
+      <div class="promise" aria-label="Promises">
+        <div class="chip">Listen with care</div>
+        <div class="chip">Speak with kindness</div>
+        <div class="chip">Protect with honesty</div>
+      </div>
+
+      <p class="signature">— Yours, forever</p>
+
+      <div class="cta">
+        <button class="btn" id="save">Save as image</button>
+        <button class="btn ghost" id="spark">Add a sprinkle of hearts</button>
+      </div>
+    </article>
+  </main>
+
+  <!-- Minimal, dependency-free helpers -->
+  <script>
+    // Floating hearts field (random positions/paths)
+    const HEART_COUNT = 20;
+    const heartsRoot = document.getElementById('hearts');
+    function makeHeart(x, dur, delay, drift){
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.style.setProperty('--x', x+'vw');
+      el.style.setProperty('--drift', drift+'vw');
+      el.style.animationDuration = dur+'s';
+      el.style.animationDelay = delay+'s';
+      el.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 21s-6.7-4.4-9.4-7.1A5.6 5.6 0 0 1 12 5.2 5.6 5.6 0 0 1 21.4 14c-2.7 2.7-9.4 7-9.4 7z"
+                fill="url(#g)"/>
+          <defs>
+            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#ff6b9a" />
+              <stop offset="100%" stop-color="#ffd1dc" />
+            </linearGradient>
+          </defs>
+        </svg>`;
+      return el;
+    }
+    for(let i=0;i<HEART_COUNT;i++){
+      const x = Math.random()*100;
+      const dur = 22 + Math.random()*18;
+      const delay = Math.random()*-dur;
+      const drift = (Math.random()>.5?1:-1) * (8+Math.random()*18);
+      heartsRoot.appendChild(makeHeart(x,dur,delay,drift));
+    }
+
+    // “Add a sprinkle” button = burst of hearts near the card center
+    document.getElementById('spark').addEventListener('click', ()=>{
+      const burst = 10;
+      for(let i=0;i<burst;i++){
+        const x = 45 + Math.random()*10;
+        const h = makeHeart(x, 10+Math.random()*6, 0, (Math.random()>.5?1:-1)*(6+Math.random()*10));
+        h.style.opacity = .22;
+        heartsRoot.appendChild(h);
+        setTimeout(()=>h.remove(), 12000);
+      }
+    });
+
+    // Save the card as an image (client-side, no libs)
+    // Renders SVG + text via a canvas snapshot of the card using HTMLCanvasElement.toDataURL
+    // (Simple approach: clone node into an inline SVG foreignObject)
+    document.getElementById('save').addEventListener('click', ()=>{
+      const node = document.querySelector('.card');
+      const rect = node.getBoundingClientRect();
+      const clone = node.cloneNode(true);
+      const w = Math.ceil(rect.width);
+      const h = Math.ceil(rect.height);
+      // Wrap clone in a foreignObject SVG
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+          <foreignObject width="100%" height="100%">
+            ${new XMLSerializer().serializeToString(stylizeForExport(clone))}
+          </foreignObject>
+        </svg>`;
+      const svgBlob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = function(){
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0e0f25';
+        ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0);
+        const a = document.createElement('a');
+        a.download = 'For_Hiba.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    });
+
+    // Inline styles/fonts for export (keeps look consistent inside foreignObject)
+    function stylizeForExport(node){
+      const wrap = document.createElement('div');
+      wrap.style.width = getComputedStyle(node).width;
+      wrap.style.height = 'auto';
+      wrap.style.padding = getComputedStyle(node).padding;
+      wrap.style.background = 'linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03))';
+      wrap.style.border = '1px solid rgba(255,255,255,.22)';
+      wrap.style.borderRadius = '28px';
+      wrap.style.color = '#f6f7ff';
+      wrap.style.fontFamily = 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+      wrap.style.boxSizing = 'border-box';
+      // import fonts inside clone
+      const head = document.createElement('div');
+      head.innerHTML = `<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Great+Vibes&display=swap');
+        *{box-sizing:border-box}
+        .title{font-family:"Great Vibes",serif}
+      </style>`;
+      wrap.appendChild(head);
+      wrap.appendChild(node);
+      return wrap;
+    }
+
+    // Optional: automatically highlight the exact anniversary minute (blinks the dot if user opens at 21:52)
+    (function highlightExactMinute(){
+      const now = new Date();
+      if(now.getHours() === 21 && now.getMinutes() === 52){
+        const dot = document.querySelector('.dot');
+        if(dot){
+          dot.animate([
+            { transform:'scale(1)', boxShadow:'0 0 10px #ff6b9a55' },
+            { transform:'scale(1.6)', boxShadow:'0 0 24px #ff6b9aaa' },
+            { transform:'scale(1)', boxShadow:'0 0 10px #ff6b9a55' }
+          ],{duration:1400,iterations:6,easing:'ease-in-out'});
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

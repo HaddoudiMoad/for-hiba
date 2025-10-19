@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ffdae8" />
+<title>my baby girl Hiba’s Sky of Notes 💌☁️</title>
+<meta name="description" content="Pastel sky with clouds, string lights, and flying love notes for my baby girl Hiba. Mobile-first." />
+<style>
+  :root{
+    --ink:#2a2230; --muted:#6c6273; --line:rgba(0,0,0,.08);
+    --sky-a:#ffdbe8; --sky-b:#ffeef7; --sky-c:#e9f6ff;
+    --note:#fff9f1; --note-line:#ffd2a8;
+    --hudbg:rgba(255,255,255,.55);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, var(--sky-a), var(--sky-b) 55%, var(--sky-c));
+    overflow:hidden; touch-action:manipulation; -webkit-user-select:none; user-select:none; height:100dvh;
+  }
+  /* --- LAYERS & Z-INDEX --- */
+  .clouds { position:fixed; inset:0; pointer-events:none; z-index:1; }
+  .lights { position:fixed; left:0; right:0; top:calc(env(safe-area-inset-top,0) + 8px); height:100px; pointer-events:none; z-index:2; }
+  .bokeh  { position:fixed; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:.6; z-index:3; }
+  canvas#fx{ position:fixed; inset:0; pointer-events:none; z-index:4; }
+  /* NEW: dedicated notes layer below UI, above visuals */
+  .notes-layer{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:5; }
+
+  .title{ position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top,0) + 16px);
+    text-align:center; font-weight:800; letter-spacing:.3px; text-shadow:0 1px 0 #fff8;
+    font-size:clamp(16px, 2.8vw, 18px); z-index:10; }
+  .title small{ display:block; color:var(--muted); font-weight:500; margin-top:4px }
+
+  .hud{ position:fixed; left:12px; right:12px; bottom:calc(env(safe-area-inset-bottom,0) + 10px);
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; padding:10px;
+    background:var(--hudbg); border:1px solid var(--line); border-radius:16px; backdrop-filter: blur(14px);
+    z-index:15; }
+  @media (min-width:540px){ .hud{ grid-template-columns: repeat(6, 1fr) } }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:50px;
+    border-radius:14px; padding:12px; border:1px solid var(--line);
+    background:rgba(255,255,255,.65); color:#3a2d40; font-size:16px; font-weight:800; }
+  .btn:active{ transform:scale(.985) }
+
+  /* clouds */
+  .cloud{ position:absolute; width:44vw; max-width:480px; aspect-ratio:3/1.4; border-radius:999px;
+    background: radial-gradient(120% 80% at 50% 40%, #fff 0%, #fff6 65%, #fff0 80%);
+    filter: blur(1px) drop-shadow(0 10px 30px rgba(0,0,0,.07)); opacity:.8; }
+  .cloud.small{ width:28vw; filter: blur(.5px) drop-shadow(0 8px 18px rgba(0,0,0,.05)); opacity:.85; }
+  .cloud.tiny{ width:18vw; opacity:.9 }
+
+  .lights svg{ width:100%; height:100% }
+  .bulb{ filter: drop-shadow(0 3px 8px rgba(255,140,180,.4)); }
+
+  .orb{ position:absolute; width:110px; height:110px; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #fff, #fff0 60%); filter: blur(6px);
+    animation: float 12s ease-in-out infinite; }
+  .orb.s{ width:70px; height:70px; animation-duration:9s }
+  @keyframes float{ 0%{ transform:translateY(0) } 50%{ transform:translateY(-20px) } 100%{ transform:translateY(0) } }
+
+  /* flying note cards (now in the notes-layer, not the body) */
+  .paper{
+    position:absolute; width:164px; min-height:120px; padding:12px 14px; border-radius:12px;
+    background:#fff9f1; border:1px solid #ffd2a8; box-shadow:0 8px 24px rgba(0,0,0,.08);
+    transform-origin:50% 10%; will-change:transform, opacity; pointer-events:none; /* critical */
+  }
+  .paper::before{ content:""; position:absolute; left:0; right:0; top:0; height:18px; border-radius:12px 12px 0 0;
+    background: linear-gradient(180deg, #ffe3c6, #ffd7b3); border-bottom:1px solid #ffcfa4; }
+  .paper p{ margin:18px 0 0; line-height:1.25; font-size:14px; word-wrap:break-word }
+
+  /* dialogs */
+  dialog{ border:none; border-radius:18px; width:min(560px,92vw); padding:0; color:var(--ink);
+    background:linear-gradient(180deg,#fff,#fff8); box-shadow:0 24px 70px rgba(0,0,0,.25); z-index:1000; }
+  dialog::backdrop{ background: rgba(0,0,0,.35) }
+  .modal-head{ padding:14px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between }
+  .modal-body{ padding:16px }
+  .x{ background:none; border:none; color:#574c5f; font-size:22px; line-height:1; padding:8px; }
+  input, textarea{ width:100%; padding:14px; border-radius:12px; border:1px solid var(--line); background:#fff; color:#2d2430; font-size:16px; }
+  .save{ background:#ffeff7; border:1px solid var(--line); color:#2d2430; padding:12px 14px; border-radius:12px; font-weight:700 }
+
+  .loveletter{ font-family:"Georgia","Times New Roman",serif; font-size:18px; line-height:1.6; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; }
+
+  .toast{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0) + 92px);
+    transform:translateX(-50%); background:#ffffffea; border:1px solid var(--line); border-radius:12px; padding:10px 14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.1); font-size:15px; color:#3a2d40; z-index:999; }
+    #btnAdd,#btnName, #saveLine, #customLine {
+        display: none;
+    }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important } }
+</style>
+</head>
+<body>
+  <!-- clouds -->
+  <div class="clouds" aria-hidden="true">
+    <div class="cloud" style="left:4%; top:18%"></div>
+    <div class="cloud small" style="left:70%; top:22%"></div>
+    <div class="cloud small" style="left:18%; top:46%"></div>
+    <div class="cloud tiny" style="left:82%; top:52%"></div>
+  </div>
+
+  <!-- string lights -->
+  <div class="lights" aria-hidden="true">
+    <svg viewBox="0 0 100 20" preserveAspectRatio="none">
+      <path d="M-5,8 C20,2 40,14 60,6 80,-2 100,12 120,4" fill="none" stroke="#caa2ff" stroke-width="0.5" opacity=".35"/>
+      <g class="bulb">
+        <circle cx="10" cy="9" r="1.4" fill="#ffd1e6"/>
+        <circle cx="25" cy="6.6" r="1.4" fill="#ffe7b7"/>
+        <circle cx="40" cy="12.5" r="1.4" fill="#cbefff"/>
+        <circle cx="55" cy="7.5" r="1.4" fill="#ffd1e6"/>
+        <circle cx="70" cy="13" r="1.4" fill="#ffe7b7"/>
+        <circle cx="85" cy="8.5" r="1.4" fill="#cbefff"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- bokeh -->
+  <div class="bokeh" aria-hidden="true">
+    <div class="orb" style="left:6%; top:30%"></div>
+    <div class="orb s" style="left:76%; top:38%"></div>
+    <div class="orb s" style="left:24%; top:62%"></div>
+    <div class="orb" style="left:64%; top:68%"></div>
+  </div>
+
+  <!-- effects canvas -->
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <!-- NEW: notes layer -->
+  <div id="notes" class="notes-layer" aria-hidden="true"></div>
+
+  <!-- UI -->
+  <div class="title">
+    💌 my baby girl Hiba’s Sky of Notes
+    <small>notes float automatically · tap anywhere to release balloons</small>
+  </div>
+
+  <div class="hud" role="group" aria-label="Controls">
+    <button class="btn" id="btnAdd">📝 add my note</button>
+    <button class="btn" id="btnKiss">💋 kiss</button>
+    <button class="btn" id="btnBalloons">🎈 balloons</button>
+    <button class="btn" id="btnLetter">💌 letter</button>
+    <button class="btn" id="btnName">💗 name</button>
+    <button class="btn" id="btnClear">🧹 clear</button>
+  </div>
+
+  <!-- NAME -->
+  <dialog id="modalName" aria-label="Set name">
+    <div class="modal-head"><strong>her name</strong><button class="x" data-close aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <input id="nameInput" type="text" placeholder="my baby girl Hiba" />
+      <div style="height:10px"></div>
+      <button class="save" id="saveName">save</button>
+    </div>
+  </dialog>
+
+  <!-- LETTER -->
+  <dialog id="modalLetter" aria-label="Love letter">
+    <div class="modal-head"><strong>for you</strong><button class="x" data-close aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <div class="loveletter"><div id="letter" aria-live="polite"></div></div>
+      <div style="height:12px"></div>
+      <label class="muted"> KANBGHIK </label>
+      <textarea id="customLine" rows="2" placeholder="e.g., “tonight, your only job is to be adored.”"></textarea>
+      <div style="height:10px"></div>
+      <button class="save" id="saveLine">save to letter</button>
+    </div>
+  </dialog>
+
+  <!-- ADD NOTE -->
+  <dialog id="modalNote" aria-label="Add note">
+    <div class="modal-head"><strong>write a sweet note</strong><button class="x" data-close aria-label="Close">✕</button></div>
+    <div class="modal-body">
+      <textarea id="noteText" rows="3" placeholder="e.g., “my baby girl Hiba, cramps pass but my love stays.”"></textarea>
+      <div style="height:10px"></div>
+      <button class="save" id="saveNote">release into the sky</button>
+    </div>
+  </dialog>
+
+<script>
+/* ===== helpers ===== */
+const $=(q,r=document)=>r.querySelector(q);
+const $$=(q,r=document)=>[...r.querySelectorAll(q)];
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const haptics=(ms=12)=>{ if(navigator.vibrate) try{ navigator.vibrate(ms) }catch{} };
+function toast(t){ const el=document.createElement("div"); el.className="toast"; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(), 1700); }
+
+/* DPR canvas */
+const fx=$("#fx"), fctx=fx.getContext("2d");
+let W=0,H=0,DPR=Math.min(window.devicePixelRatio||1,1.7);
+function size(){ W=Math.floor(innerWidth); H=Math.floor(innerHeight);
+  fx.width=Math.floor(W*DPR); fx.height=Math.floor(H*DPR); fx.style.width=W+"px"; fx.style.height=H+"px"; fctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener("resize", size, {passive:true}); size();
+
+/* ===== Flying notes (isolation + cap) ===== */
+const notesLayer = $("#notes");
+const NOTE_MAX = 16;          // cap for sanity
+let noteCount = 0;
+const stockLines = [
+  "you are my soft place.","rest is allowed.","your brave body deserves gentleness.",
+  "i love you in every weather.","stormy day, steady love.","you make mornings brighter.",
+  "i’m here for every cramp & sigh.","you are my favorite person."
+];
+let customLines = JSON.parse(localStorage.getItem("sky_custom_lines")||"[]");
+let rafNotes = new Set();     // active rafs so we can clean up
+
+function spawnNote(text){
+  // recycle if over cap
+  while (noteCount >= NOTE_MAX) {
+    const first = notesLayer.firstElementChild;
+    if(!first) break;
+    cancelAnimationFrame(first._raf || 0);
+    first.remove();
+    noteCount--;
+  }
+  const el=document.createElement("div");
+  el.className="paper";
+  // start off-screen on left or right
+  const fromLeft = Math.random() < .5 ? -220 : (W + 220);
+  const dir = fromLeft < 0 ? 1 : -1;
+  const topY = rand(H*.18, H*.72);
+  el.style.left = "0px"; el.style.top = "0px"; // transform will position it
+  el.innerHTML = `<p>${escapeHTML(text)}</p>`;
+  notesLayer.appendChild(el);
+  noteCount++;
+
+  // animation via RAF (capped count keeps it smooth)
+  let x = fromLeft, y = topY, t = 0;
+  function tick(){
+    t += 0.016;
+    x += dir * 0.9;
+    y += Math.sin(t*1.2)*0.45;
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${Math.sin(t)*3}deg)`;
+    if ((dir===1 && x > W+240) || (dir===-1 && x < -240)) {
+      cancelAnimationFrame(el._raf || 0);
+      el.remove(); noteCount--;
+      rafNotes.delete(el._raf);
+      return;
+    }
+    el._raf = requestAnimationFrame(tick);
+    rafNotes.add(el._raf);
+  }
+  el._raf = requestAnimationFrame(tick);
+  rafNotes.add(el._raf);
+}
+
+function escapeHTML(s){ return s.replace(/[<>&]/g, m=>({ '<':'&lt;','>':'&gt;','&':'&amp;' }[m])); }
+
+/* continuous stream with visibility pause */
+let streamTimer=null;
+function startStream(){
+  if(streamTimer) return;
+  streamTimer = setInterval(()=>{
+    const pool = customLines.length ? stockLines.concat(customLines) : stockLines;
+    const text = "✦ " + pool[Math.floor(Math.random()*pool.length)];
+    spawnNote(text);
+  }, 2400);
+}
+function stopStream(){ clearInterval(streamTimer); streamTimer=null; }
+document.addEventListener("visibilitychange", ()=> {
+  if (document.hidden) stopStream(); else startStream();
+});
+
+/* ===== Balloons + kisses (canvas fluff) ===== */
+let balloons=[], kisses=[];
+function releaseBalloons(n=8, x=W*.5, y=H*.75){
+  for(let i=0;i<n;i++){
+    balloons.push({x:x+rand(-40,40), y:y+rand(-10,10), vx:rand(-.4,.4), vy:rand(-1.4,-.8), life:0, c: i%2? "#ff93b7" : "#ffd06b"});
+  }
+  haptics(12); toast("balloons away 🎈");
+}
+function drawBalloons(){
+  balloons.forEach(b=>{
+    b.life++; b.x+=b.vx + Math.sin(b.life*.04)*.3; b.y+=b.vy;
+    fctx.strokeStyle="rgba(60,40,70,.6)"; fctx.lineWidth=1; fctx.beginPath(); fctx.moveTo(b.x,b.y); fctx.lineTo(b.x,b.y+18); fctx.stroke();
+    fctx.fillStyle=b.c; fctx.beginPath(); fctx.ellipse(b.x, b.y, 10, 14, 0, 0, Math.PI*2); fctx.fill();
+  });
+  balloons = balloons.filter(b=> b.y > -30);
+}
+function sendKiss(){
+  for(let i=0;i<18;i++){ kisses.push({x:W*.5,y:H-70,vx:rand(-2,2),vy:rand(-4,-2),life:0,a:rand(0,Math.PI*2)}); }
+  haptics(16); toast("sending a kiss 💋");
+}
+function drawKisses(){
+  kisses.forEach(k=>{
+    k.life++; k.x+=k.vx; k.y+=k.vy; k.vy+=.02; k.a+=.08;
+    fctx.save(); fctx.translate(k.x,k.y); fctx.rotate(Math.sin(k.a)*.2);
+    fctx.font="22px serif"; fctx.fillText("❤️",0,0); fctx.restore();
+  });
+  kisses = kisses.filter(k=> k.life<120);
+}
+
+/* ===== UI ===== */
+$("#btnAdd").addEventListener("click", ()=> $("#modalNote").showModal());
+$("#btnKiss").addEventListener("click", sendKiss);
+$("#btnBalloons").addEventListener("click", ()=> releaseBalloons(10));
+$("#btnLetter").addEventListener("click", openLetter);
+$("#btnName").addEventListener("click", ()=> $("#modalName").showModal());
+$("#btnClear").addEventListener("click", ()=>{
+  // stop + clear notes safely
+  stopStream();
+  [...notesLayer.children].forEach(n=>{
+    if(n._raf) cancelAnimationFrame(n._raf);
+    n.remove();
+  });
+  rafNotes.forEach(id=> cancelAnimationFrame(id)); rafNotes.clear();
+  noteCount=0;
+  balloons.length=0; kisses.length=0;
+  toast("cleared ✨"); startStream();
+});
+
+/* tap anywhere to release balloons there */
+document.addEventListener("pointerdown", (e)=>{
+  const r=document.body.getBoundingClientRect();
+  releaseBalloons(6, e.clientX - r.left, e.clientY - r.top);
+});
+
+/* dialogs */
+$$("dialog [data-close]").forEach(x=> x.addEventListener("click", e=> e.target.closest("dialog").close()));
+
+/* save custom note */
+$("#saveNote").addEventListener("click", ()=>{
+  const v = $("#noteText").value.trim();
+  if(!v) return;
+  customLines.push(v);
+  localStorage.setItem("sky_custom_lines", JSON.stringify(customLines));
+  $("#noteText").value="";
+  $("#modalNote").close();
+  spawnNote("♥ " + v);
+  haptics(14);
+});
+
+/* name + letter */
+const letterEl=$("#letter"), modalLetter=$("#modalLetter"), lineInput=$("#customLine");
+const defaultLetter=()=>{ const name=localStorage.getItem("sky_name")||"my baby girl Hiba"; return `hi ${name},
+
+i know today’s a little heavy.
+let me be the soft place your shoulders rest.
+
+i can’t take the cramps away,
+but i can hold your hand through them.
+i can warm tea, fetch chocolate,
+and pick the comfiest blanket we own.
+
+your body is brave. your heart is my favorite home.
+i adore you—on sparkly days and sleepy ones.
+
+love, me.`; };
+function typewrite(txt,el,s=16){ el.textContent=""; let i=0; const t=setInterval(()=>{ el.textContent+=txt[i++]||""; if(i>=txt.length) clearInterval(t); }, s); }
+function openLetter(){ modalLetter.showModal(); typewrite(defaultLetter(), letterEl, 15); const saved=localStorage.getItem("sky_line"); if(saved) $("#customLine").value=saved; }
+$("#saveLine").addEventListener("click", ()=>{ const v=lineInput.value.trim(); if(v){ localStorage.setItem("sky_line", v); letterEl.textContent+=`\n\n${v}`; toast("added to letter 💗"); haptics(12); } });
+
+$("#saveName").addEventListener("click", ()=>{
+  const v=$("#nameInput").value.trim(); if(v){
+    document.title=`${v}’s Sky of Notes 💌☁️`; localStorage.setItem("sky_name", v); toast("name saved");
+  }
+  $("#modalName").close();
+});
+const n0=localStorage.getItem("sky_name"); if(n0){ document.title=`${n0}’s Sky of Notes 💌☁️`; }
+
+/* main loop */
+(function loop(){
+  fctx.clearRect(0,0,W,H);
+  drawBalloons(); drawKisses();
+  requestAnimationFrame(loop);
+})();
+startStream(); // keeps notes coming (pauses on background)
+</script>
+</body>
+</html>
